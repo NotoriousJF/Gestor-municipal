@@ -1,0 +1,308 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║              GUÍA PASO A PASO - DEPLOYMENT EN RENDER.COM                     ║
+║              Sistema Gestor Documental - Municipalidad El Tabo              ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  ¿QUÉ ES RENDER.COM?
+═══════════════════════════════════════════════════════════════════════════════
+
+Render.com es un servicio de hosting web GRATUITO que permite:
+  ✓ Publicar aplicaciones Python/Flask en internet
+  ✓ SSL/HTTPS automático (conexión segura)
+  ✓ URLs públicas (ej: https://gestor-eltabo.onrender.com)
+  ✓ Base de datos incluida
+  ✓ 1 GB de almacenamiento gratis
+  ✓ Sin tarjeta de crédito requerida
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  PASO 1: CREAR CUENTA EN RENDER (5 minutos)
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Ir a: https://render.com
+2. Clic en "Get Started" o "Sign Up"
+3. Opciones de registro:
+   • Con GitHub (recomendado) → Autoriza acceso
+   • Con Google → Inicia sesión
+   • Con email → Crea contraseña
+
+4. Verificar email si lo pide
+5. Ya estás dentro del Dashboard de Render
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  PASO 2: SUBIR CÓDIGO A GITHUB (10 minutos)
+═══════════════════════════════════════════════════════════════════════════════
+
+OPCIÓN A - Si sabes usar Git:
+
+  En tu terminal/CMD:
+  
+  cd GestorWeb
+  git init
+  git add .
+  git commit -m "Sistema Gestor Documental Municipal"
+  
+  # Crear repo en GitHub primero
+  # Luego:
+  git remote add origin https://github.com/TU-USUARIO/gestor-municipal.git
+  git push -u origin main
+
+
+OPCIÓN B - Si NO sabes usar Git (más fácil):
+
+  1. Ir a https://github.com y crear cuenta (si no tienes)
+  2. Clic en "New repository"
+  3. Nombre: gestor-municipal
+  4. Público o Privado (da igual)
+  5. Clic "Create repository"
+  
+  6. En tu carpeta GestorWeb:
+     - Comprimir TODO en un .zip
+  
+  7. En GitHub:
+     - Ir a tu repositorio
+     - Clic "Add file" → "Upload files"
+     - Arrastrar el .zip y subirlo
+     - Clic "Commit changes"
+  
+  8. Descomprimir en GitHub:
+     - No es necesario, Render lee todo
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  PASO 3: CONECTAR RENDER CON GITHUB (5 minutos)
+═══════════════════════════════════════════════════════════════════════════════
+
+1. En Render Dashboard: https://dashboard.render.com
+
+2. Clic en "New +" (arriba derecha)
+
+3. Seleccionar "Web Service"
+
+4. Conectar GitHub:
+   - Si es la primera vez: Clic "Connect GitHub"
+   - Autorizar Render a ver tus repos
+   - Seleccionar el repositorio "gestor-municipal"
+
+5. Si ya conectaste antes:
+   - Buscar tu repo en la lista
+   - Clic "Connect"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  PASO 4: CONFIGURAR EL WEB SERVICE (5 minutos)
+═══════════════════════════════════════════════════════════════════════════════
+
+En la pantalla de configuración:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CONFIGURACIÓN OBLIGATORIA:                                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Name:                gestor-documental-eltabo                             │
+│  Region:              Oregon (US West) o la más cercana                    │
+│  Branch:              main                                                 │
+│  Root Directory:      [dejar vacío]                                        │
+│  Runtime:             Python 3                                             │
+│  Build Command:       pip install -r requirements.txt                      │
+│  Start Command:       gunicorn app:app --bind 0.0.0.0:$PORT --timeout 300 │
+│                                                                             │
+│  Instance Type:       ⚠️ SELECCIONAR "Free" (no el Starter)                │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+IMPORTANTE: Asegúrate de seleccionar el plan "Free". Si no lo ves:
+  • Scroll down en la lista de planes
+  • Debe decir "$0/month"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  PASO 5: AGREGAR ALMACENAMIENTO (CRÍTICO)
+═══════════════════════════════════════════════════════════════════════════════
+
+Antes de hacer clic en "Create Web Service":
+
+1. Scroll down hasta ver "Disks"
+
+2. Clic en "+ Add Disk"
+
+3. Configuración:
+   ┌──────────────────────────────────┐
+   │ Name:        data                │
+   │ Mount Path:  /opt/render/project/│
+   │              src/data            │
+   │ Size:        1 GB                │
+   └──────────────────────────────────┘
+
+4. Clic "Save"
+
+⚠️ IMPORTANTE: Sin esto, los PDFs se borran cada vez que se reinicia el servidor
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  PASO 6: CREAR Y ESPERAR DEPLOYMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Clic en "Create Web Service" (botón azul abajo)
+
+2. Render comenzará a:
+   ✓ Descargar tu código de GitHub
+   ✓ Instalar Python
+   ✓ Instalar Flask, EasyOCR, etc. (tarda ~10 min)
+   ✓ Descargar modelos de OCR (~2 GB)
+   ✓ Iniciar el servidor
+
+3. Ver progreso en tiempo real:
+   • Logs aparecen en pantalla
+   • Dice "Installing..." → "Building..." → "Starting..."
+
+4. Cuando veas:
+   "Your service is live 🎉"
+   
+   ¡LISTO! El sistema está en línea
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  PASO 7: OBTENER LA URL Y PROBAR
+═══════════════════════════════════════════════════════════════════════════════
+
+1. En la parte superior verás la URL:
+   
+   https://gestor-documental-eltabo.onrender.com
+   
+   (o similar)
+
+2. Copiar esa URL
+
+3. Abrir en navegador
+
+4. Deberías ver:
+   ✓ Logo de la municipalidad
+   ✓ "Sistema Gestor Documental"
+   ✓ Zona de carga de PDFs
+
+5. PROBAR:
+   • Arrastrar un PDF
+   • Clic "Procesar"
+   • Verificar que funciona
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  PASO 8: COMPARTIR CON FUNCIONARIOS
+═══════════════════════════════════════════════════════════════════════════════
+
+Ahora todos pueden usar el sistema:
+
+1. Compartir la URL por email/WhatsApp:
+   
+   "Gestor Documental: https://gestor-documental-eltabo.onrender.com"
+
+2. Instrucciones para funcionarios:
+   
+   • Abrir el link en Chrome/Firefox
+   • Arrastrar PDFs
+   • Clic "Procesar"
+   • Ver historial en pestaña "Historial"
+   • Descargar Excel en pestaña "Estadísticas"
+
+3. NO necesitan instalar nada
+4. NO necesitan Python ni nada técnico
+5. Funciona desde cualquier PC con internet
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  MANTENIMIENTO Y ACTUALIZACIONES
+═══════════════════════════════════════════════════════════════════════════════
+
+Para actualizar el sistema:
+
+1. Modificar código en GitHub
+   • Subir cambios (commit + push)
+
+2. Render detecta automáticamente
+   • Re-despliega en 2-3 minutos
+   • Actualiza para todos
+
+3. Ver logs:
+   • En Render Dashboard → tu servicio → Logs
+   • Ver errores en tiempo real
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  SOLUCIÓN DE PROBLEMAS
+═══════════════════════════════════════════════════════════════════════════════
+
+❌ PROBLEMA: "Service failed to start"
+✅ SOLUCIÓN: 
+   • Verificar logs en Render
+   • Asegurarse que Build Command es: pip install -r requirements.txt
+   • Asegurarse que Start Command es: gunicorn app:app --bind 0.0.0.0:$PORT
+
+❌ PROBLEMA: Dice "Application Error" al abrir URL
+✅ SOLUCIÓN:
+   • Ver logs (hay error en código)
+   • Verificar que instance type es "Free"
+   • Esperar 1 minuto más (a veces tarda)
+
+❌ PROBLEMA: Los PDFs se borran después de un tiempo
+✅ SOLUCIÓN:
+   • Verificar que agregaste el Disk en Paso 5
+   • Mount path debe ser: /opt/render/project/src/data
+
+❌ PROBLEMA: Muy lento al procesar
+✅ SOLUCIÓN:
+   • Plan gratuito tiene limitaciones
+   • OCR tarda ~5-10 seg por PDF escaneado
+   • Procesar de a pocos (máximo 10 a la vez)
+
+❌ PROBLEMA: Se "duerme" después de 15 minutos sin uso
+✅ SOLUCIÓN:
+   • Es normal en plan Free
+   • Primera carga tarda 30-60 seg
+   • Después funciona normal
+   • Para evitarlo: Upgrade a plan Starter ($7/mes)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  COSTO TOTAL
+═══════════════════════════════════════════════════════════════════════════════
+
+Plan FREE (suficiente para municipalidad pequeña):
+  • Costo: $0/mes
+  • Límite: Se duerme después de 15 min sin uso
+  • Límite: 750 horas/mes de uso
+  • Almacenamiento: 1 GB
+  • Tráfico: Ilimitado
+
+Plan STARTER (recomendado para producción):
+  • Costo: $7 USD/mes (~$6.500 CLP)
+  • Sin límite de horas
+  • Nunca se duerme
+  • Más rápido
+  • 10 GB almacenamiento
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  RESUMEN RÁPIDO
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Crear cuenta en Render.com
+2. Subir código a GitHub
+3. En Render: New → Web Service → Conectar repo
+4. Configurar: Python 3, comandos correctos, plan Free
+5. Agregar Disk de 1GB en /opt/render/project/src/data
+6. Create Web Service → Esperar 10-15 min
+7. Copiar URL y compartir
+8. ¡Listo!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Para dudas o problemas, contactar a Informática Municipal.
+
+═══════════════════════════════════════════════════════════════════════════════
